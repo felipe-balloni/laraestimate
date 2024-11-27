@@ -22,6 +22,7 @@ return [
     'item_price' => 'Preço do Item',
     'use_name_as_title' => 'Usar nome como título?',
     'view_estimate' => 'Visualizar Orçamento',
+    'time_rate' => "Valor hora",
     'currency_symbol' => 'Símbolo da Moeda',
     'currency_decimal_separator' => 'Separador Decimal',
     'currency_thousands_separator' => 'Separador dos Milhares',

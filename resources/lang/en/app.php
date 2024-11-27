@@ -22,6 +22,7 @@ return [
     'item_price' => 'Item Price',
     'use_name_as_title' => 'Use name as title?',
     'view_estimate' => 'View Estimate',
+    'time_rate' => "Time Rate",
     'currency_symbol' => 'Currency Symbol',
     'currency_decimal_separator' => 'Decimal Separator',
     'currency_thousands_separator' => 'Thousands Separator',
