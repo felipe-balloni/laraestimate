@@ -8,10 +8,11 @@ use Illuminate\Database\Eloquent\Model;
 class Item extends Model
 {
     use HasUUID;
-    
+
     protected $fillable = [
         'description',
         'duration',
+        'time_rate',
         'price',
         'obligatory',
     ];

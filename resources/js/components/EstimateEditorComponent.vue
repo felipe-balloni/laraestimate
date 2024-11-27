@@ -29,17 +29,22 @@
                 </div>
             </div>
 
-            <div class="form-group col-md-4">
+            <div class="form-group col-md-3">
+                <label for="time_rate">{{ trans.get('app.time_rate') }}</label>
+                <input type="text" class="form-control" v-model="estimateData.time_rate" @input="updateDebounced()">
+            </div>
+
+            <div class="form-group col-md-3">
                 <label for="currency_symbol">{{ trans.get('app.currency_symbol') }}</label>
                 <input type="text" class="form-control" v-model="estimateData.currency_settings.symbol" @input="updateDebounced()">
             </div>
 
-            <div class="form-group col-md-4">
+            <div class="form-group col-md-3">
                 <label for="currency_decimal_separator">{{ trans.get('app.currency_decimal_separator') }}</label>
                 <input type="text" class="form-control" v-model="estimateData.currency_settings.decimal_separator" @input="updateDebounced()">
             </div>
 
-            <div class="form-group col-md-4">
+            <div class="form-group col-md-3">
                 <label for="currency_thousands_separator">{{ trans.get('app.currency_thousands_separator') }}</label>
                 <input type="text" class="form-control" v-model="estimateData.currency_settings.thousands_separator" @input="updateDebounced()">
             </div>
@@ -50,7 +55,7 @@
                 </div>
             </div>
         </div>
-        
+
         <hr>
 
         <div class="row mt-4">
@@ -62,11 +67,14 @@
             <div class="col-sm-12 mt-4">
                 <draggable v-model="sections" draggable=".item" handle=".handle" @end="orderChanged()">
                     <div class="item" v-for="(section, index) in sections" :key="section.id">
-                        <estimate-section 
-                        :section="section" 
-                        :estimate="estimate"
-                        :currencySettings="estimateData.currency_settings"
-                        @sectionUpdated="updateSection($event, index)" @sectionRemoved="removeSection(index, 'text')"></estimate-section>
+                        <estimate-section
+                            :section="section"
+                            :estimate="estimate"
+                            :currencySettings="estimateData.currency_settings"
+                            :timeRate="estimateData.time_rate"
+                            @sectionUpdated="updateSection($event, index)"
+                            @sectionRemoved="removeSection(index, 'text')">
+                        </estimate-section>
                     </div>
                 </draggable>
             </div>
@@ -84,11 +92,11 @@ import draggable from 'vuedraggable';
 
 export default {
     props: ['estimate'],
-    
+
     components: {
         draggable,
     },
-    
+
     data() {
         return {
             saving: false,
@@ -104,7 +112,7 @@ export default {
     computed: {
         total() {
             let total = this.sections.reduce((sum, section) => {
-                return sum + parseFloat(section.total || 0); 
+                return sum + parseFloat(section.total || 0);
             }, 0);
 
             return parseFloat(total);
@@ -163,9 +171,9 @@ export default {
 
         updateSection(sectionData, index) {
             this.$set(this.sections, index, sectionData);
-            
+
             let total = this.sections.reduce((sum, section) => {
-                return sum + parseFloat(section.total || 0); 
+                return sum + parseFloat(section.total || 0);
             }, 0)
         },
 
@@ -189,6 +197,7 @@ export default {
                 name: this.estimateData.name,
                 use_name_as_title: this.estimateData.use_name_as_title,
                 sections_positions: this.calculateSectionsPositions(),
+                time_rate: this.estimateData.time_rate,
                 currency_symbol: this.estimateData.currency_settings.symbol,
                 currency_decimal_separator: this.estimateData.currency_settings.decimal_separator,
                 currency_thousands_separator: this.estimateData.currency_settings.thousands_separator,
@@ -209,11 +218,11 @@ export default {
             if(!this.estimateData) return '-';
 
             let currencySettings = this.estimateData.currency_settings;
-            
+
             return currencySettings.symbol + ' ' + formatMoney(
-                money, 
-                2, 
-                currencySettings.decimal_separator, 
+                money,
+                2,
+                currencySettings.decimal_separator,
                 currencySettings.thousands_separator
             ).toString();
         }

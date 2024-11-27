@@ -24,7 +24,7 @@
             <VueTrix v-model="sectionData.text" @input="saveSectionWithDebounce()" placeholder="Add your section content here. You can use *TOTAL_PRICE* to show the estimate total price in any place, and *TOTAL_SELECTED_PRICE* to show the total selected price." />
 
             <div class="mt-4" v-if="sectionData.type == 'prices'">
-                
+
                  <draggable v-model="sectionData.items" draggable=".item" handle=".handle" @end="saveSection()">
                     <div class="row mt-2 item" v-for="(item, index) in sectionData.items" :key="item.id">
                         <div class="col-md-2">
@@ -39,8 +39,11 @@
                         <div class="col-md-5">
                             <input type="text" class="form-control" :placeholder="trans.get('app.item_description')" v-model="item.description" @input="saveSectionWithDebounce()" @blur="saveSection()">
                         </div>
-                        <div class="col-md-2">
-                            <input type="text" class="form-control" :placeholder="trans.get('app.item_duration')" v-model="item.duration" @input="saveSectionWithDebounce()" @blur="saveSection()">
+                        <div class="col-md-1">
+                            <input type="text" class="form-control" :placeholder="trans.get('app.item_duration')" v-model="item.duration" @input="recalculatePriceAndSaveSection(item)" @blur="saveSection()">
+                        </div>
+                        <div class="col-md-1">
+                            <input type="number" step="0.5" class="form-control" :placeholder="trans.get('app.time_rate')" v-model="item.time_rate" @input="recalculatePriceAndSaveSection(item)" @blur="saveSection()">
                         </div>
                         <div class="col-md-2">
                             <input type="number" step="0.1" class="form-control" :placeholder="trans.get('app.item_price')" v-model="item.price" @input="saveSectionWithDebounce()" @blur="saveSection()">
@@ -75,7 +78,7 @@ export default {
         draggable
     },
 
-    props: ['estimate', 'section', 'currencySettings'],
+    props: ['estimate', 'section', 'currencySettings', 'timeRate'],
 
     data() {
         return {
@@ -95,7 +98,7 @@ export default {
     computed: {
         total() {
             let total = this.sectionData.items.reduce((sum, item) => {
-                return sum + (parseFloat(item.price) || 0); 
+                return sum + (parseFloat(item.price) || 0);
             }, 0);
 
             total = parseFloat(total);
@@ -123,9 +126,30 @@ export default {
 
     methods: {
 
+        validateFields() {
+            return this.sectionData.items.every(item => {
+                return item.description && item.duration && item.time_rate && item.price !== null;
+            });
+        },
+
+        calculatePrice(item) {
+            const duration = parseFloat(item.duration) || 0;
+            const timeRate = parseFloat(item.time_rate) || 0;
+
+            item.price = duration * timeRate;
+
+            this.madeFirstInput = (this.sectionData.madeFirstInput !== undefined) ? this.sectionData.madeFirstInput : true;
+        },
+
         init() {
             this.sectionData = this.section;
-            this.madeFirstInput = (this.sectionData.madeFirstInput != undefined) ? this.sectionData.madeFirstInput : true;
+            this.madeFirstInput = (this.sectionData.madeFirstInput !== undefined) ? this.sectionData.madeFirstInput : true;
+            this.sectionData.items.forEach(item => {
+                if (!item.time_rate) {
+                    item.time_rate = this.timeRate;
+                }
+            });
+
             this.$emit('sectionUpdated', this.sectionData);
         },
 
@@ -133,14 +157,19 @@ export default {
             this.saveSection();
         }, 300),
 
+        recalculatePriceAndSaveSection(item) {
+            this.calculatePrice(item);
+            this.saveSectionWithDebounce();
+        },
+
         saveSection() {
             if(!this.madeFirstInput) {
                 this.madeFirstInput = true;
                 return;
             }
-           
+
             this.$emit('sectionUpdated', this.sectionData);
-            
+
             this.showSavingLabel();
 
             if(!this.sectionData.id) {
@@ -152,6 +181,10 @@ export default {
         },
 
         save() {
+            if (!this.validateFields()) {
+                return;
+            }
+
             let url = '/estimates/:estimate/sections';
             url = url.replace(':estimate', this.estimate);
 
@@ -165,6 +198,10 @@ export default {
         },
 
         update() {
+            if (!this.validateFields()) {
+                return;
+            }
+
             let url = '/estimates/:estimate/sections/:section';
             url = url.replace(':estimate', this.estimate);
             url = url.replace(':section', this.sectionData.id);
@@ -197,8 +234,9 @@ export default {
         addItem() {
             this.sectionData.items.push({
                 'description': '',
-                'duration': '',
-                'price': null,
+                'duration': null,
+                'time_rate': this.timeRate,
+                'price': 0,
                 'obligatory': false,
             });
         },
