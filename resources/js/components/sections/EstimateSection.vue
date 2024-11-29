@@ -39,11 +39,8 @@
                         <div class="col-md-5">
                             <input type="text" class="form-control" :placeholder="trans.get('app.item_description')" v-model="item.description" @input="saveSectionWithDebounce()" @blur="saveSection()">
                         </div>
-                        <div class="col-md-1">
-                            <input type="text" class="form-control" :placeholder="trans.get('app.item_duration')" v-model="item.duration" @input="recalculatePriceAndSaveSection(item)" @blur="saveSection()">
-                        </div>
-                        <div class="col-md-1">
-                            <input type="number" step="0.5" class="form-control" :placeholder="trans.get('app.time_rate')" v-model="item.time_rate" @input="recalculatePriceAndSaveSection(item)" @blur="saveSection()">
+                        <div class="col-md-2">
+                            <input type="text" class="form-control" :placeholder="trans.get('app.item_duration')" v-model="item.duration" @input="saveSectionWithDebounce()" @blur="saveSection()">
                         </div>
                         <div class="col-md-2">
                             <input type="number" step="0.1" class="form-control" :placeholder="trans.get('app.item_price')" v-model="item.price" @input="saveSectionWithDebounce()" @blur="saveSection()">
@@ -78,7 +75,7 @@ export default {
         draggable
     },
 
-    props: ['estimate', 'section', 'currencySettings', 'timeRate'],
+    props: ['estimate', 'section', 'currencySettings'],
 
     data() {
         return {
@@ -126,41 +123,15 @@ export default {
 
     methods: {
 
-        validateFields() {
-            return this.sectionData.items.every(item => {
-                return item.description && item.duration && item.time_rate && item.price !== null;
-            });
-        },
-
-        calculatePrice(item) {
-            const duration = parseFloat(item.duration) || 0;
-            const timeRate = parseFloat(item.time_rate) || 0;
-
-            item.price = duration * timeRate;
-
-            this.madeFirstInput = (this.sectionData.madeFirstInput !== undefined) ? this.sectionData.madeFirstInput : true;
-        },
-
         init() {
             this.sectionData = this.section;
-            this.madeFirstInput = (this.sectionData.madeFirstInput !== undefined) ? this.sectionData.madeFirstInput : true;
-            this.sectionData.items.forEach(item => {
-                if (!item.time_rate) {
-                    item.time_rate = this.timeRate;
-                }
-            });
-
+            this.madeFirstInput = (this.sectionData.madeFirstInput != undefined) ? this.sectionData.madeFirstInput : true;
             this.$emit('sectionUpdated', this.sectionData);
         },
 
         saveSectionWithDebounce: _.debounce(function() {
             this.saveSection();
         }, 300),
-
-        recalculatePriceAndSaveSection(item) {
-            this.calculatePrice(item);
-            this.saveSectionWithDebounce();
-        },
 
         saveSection() {
             if(!this.madeFirstInput) {
@@ -181,10 +152,6 @@ export default {
         },
 
         save() {
-            if (!this.validateFields()) {
-                return;
-            }
-
             let url = '/estimates/:estimate/sections';
             url = url.replace(':estimate', this.estimate);
 
@@ -198,10 +165,6 @@ export default {
         },
 
         update() {
-            if (!this.validateFields()) {
-                return;
-            }
-
             let url = '/estimates/:estimate/sections/:section';
             url = url.replace(':estimate', this.estimate);
             url = url.replace(':section', this.sectionData.id);
@@ -234,9 +197,8 @@ export default {
         addItem() {
             this.sectionData.items.push({
                 'description': '',
-                'duration': null,
-                'time_rate': this.timeRate,
-                'price': 0,
+                'duration': '',
+                'price': null,
                 'obligatory': false,
             });
         },
