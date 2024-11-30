@@ -2,6 +2,9 @@
 
 namespace Tests\Feature;
 
+use App\Mail\EstimateLink;
+use Illuminate\Foundation\Testing\WithFaker;
+use Illuminate\Support\Facades\Mail;
 use Tests\TestCase;
 use App\Models\Estimate;
 use Illuminate\Auth\AuthenticationException;
@@ -9,7 +12,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class EstimateTest extends TestCase
 {
-    use RefreshDatabase;
+    use RefreshDatabase, WithFaker;
 
     public function test_a_guest_cannot_list_estimates()
     {
@@ -23,7 +26,7 @@ class EstimateTest extends TestCase
     public function test_a_user_can_list_estimates()
     {
         $this->signIn();
-        $estimates = Estimate::factory( 5)->create();
+        $estimates = Estimate::factory(5)->create();
 
         $response = $this->get(route('estimates.index'));
 
@@ -52,10 +55,31 @@ class EstimateTest extends TestCase
         $estimate = Estimate::factory()->create();
 
         $response = $this->put(route('estimates.update', $estimate), [
-            'name' => $estimate->name . ' Edited',
+            'name' => $estimate->name.' Edited',
             'sections_positions' => []
         ]);
 
-        $this->assertEquals($estimate->name . ' Edited', $estimate->fresh()->name);
+        $this->assertEquals($estimate->name.' Edited', $estimate->fresh()->name);
+    }
+
+    public function test_a_user_can_share_estimate(): void
+    {
+        Mail::fake();
+
+        $this->signIn();
+
+        $estimate = Estimate::factory()->create();
+
+        $response = $this->post(route('estimates.share', $estimate), [
+            'email' => $email = $this->faker->safeEmail(),
+
+        ]);
+
+        $response->assertOk();
+
+        // assert mail has sent to $email
+        Mail::assertSent(EstimateLink::class, function ($mail) use ($email, $estimate) {
+            return $mail->hasTo($email) && $mail->estimate->is($estimate);
+        });
     }
 }
