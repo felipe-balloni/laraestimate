@@ -1,12 +1,13 @@
-require('./bootstrap');
-require('./helpers');
+import './bootstrap';
+import './helpers';
 
 /**
  * Loading Adapters
  */
-require('./adapters/ToastAdapter');
+import './adapters/ToastAdapter';
 
-window.Vue = require('vue');
+import Vue from 'vue';
+window.Vue = Vue;
 
 import Lang from 'lang.js';
 

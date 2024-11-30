@@ -1,4 +1,5 @@
-window.toastr = require('toastr');
+import toastr from 'toastr';
+window.toastr = toastr;
 
 toastr.options.closeButton = true;
 
