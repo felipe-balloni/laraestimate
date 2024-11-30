@@ -15,12 +15,12 @@ class SectionTest extends TestCase
     {
         $this->signIn();
 
-        $estimate = factory(Estimate::class)->create();
-        
+        $estimate = Estimate::factory()->create();
+
         $sections = [];
 
         for($i = 0; $i < 3; $i++) {
-            $sectionData = factory(Section::class)->make()->toArray();
+            $sectionData = Section::factory()->make()->toArray();
             $sections[] = $estimate->sections()->create($sectionData);
         }
 
