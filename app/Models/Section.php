@@ -3,12 +3,13 @@
 namespace App\Models;
 
 use App\Traits\HasUUID;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Section extends Model
 {
-    use HasUUID;
-    
+    use HasUUID, HasFactory;
+
     protected $fillable = [
         'text',
         'type',
@@ -73,6 +74,6 @@ class Section extends Model
                 $item->position = $position;
                 $item->save();
             }
-        }        
+        }
     }
 }
