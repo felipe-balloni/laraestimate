@@ -3,7 +3,7 @@
 namespace App\Models\Scopes;
 
 trait Search {
-    
+
     /**
      * Adds a scope to search the table based on the
      * $searchableFields array inside the model
@@ -15,7 +15,7 @@ trait Search {
     public function scopeSearch($query, $search)
     {
         if(isset($this->searchableFields) && count($this->searchableFields)) {
-            
+
             $query->where(function($query) use ($search){
                 foreach ($this->searchableFields as $field) {
                     $query->orWhere($field, 'like', "%{$search}%");

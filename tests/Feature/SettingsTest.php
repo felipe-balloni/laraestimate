@@ -31,7 +31,7 @@ class SettingsTest extends TestCase
     public function test_a_user_can_edit_settings()
     {
         $this->signIn();
-        
+
         /**
          * First access the settings page to create the default settings
          */

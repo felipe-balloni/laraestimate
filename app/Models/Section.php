@@ -3,12 +3,13 @@
 namespace App\Models;
 
 use App\Traits\HasUUID;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Section extends Model
 {
-    use HasUUID, HasFactory;
+    use HasUuids, HasFactory;
 
     protected $fillable = [
         'text',

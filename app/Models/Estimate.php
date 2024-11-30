@@ -4,13 +4,19 @@ namespace App\Models;
 
 use App\Models\Setting;
 use App\Traits\HasUUID;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Estimate extends Model
 {
-    use SoftDeletes, HasUUID, HasFactory;
+    use SoftDeletes, HasUuids, HasFactory;
 
     protected $fillable = [
         'name',
@@ -30,7 +36,12 @@ class Estimate extends Model
         'currency_settings',
     ];
 
-    public function sections()
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function sections(): HasMany
     {
         return $this->hasMany(Section::class)
             ->with('items')
@@ -38,17 +49,17 @@ class Estimate extends Model
             ->orderBy('created_at', 'desc');
     }
 
-    public function items()
+    public function items(): HasManyThrough
     {
         return $this->hasManyThrough(Item::class, Section::class);
     }
 
-    public function scopeSearch($query, $search)
+    public function scopeSearch(Builder $query, string $search): void
     {
-        return $query->where('name', 'like', "%{$search}%");
+        $query->where('name', 'like', "%{$search}%");
     }
 
-    public function getLogoImageAttribute()
+    public function getLogoImageAttribute(): ?string
     {
         $setting = Setting::first();
 
@@ -59,12 +70,14 @@ class Estimate extends Model
         return null;
     }
 
-    public function getShareUrlAttribute()
+    protected function shareUrl(): Attribute
     {
-        return route('estimates.view', $this);
+        return Attribute::make(
+            route('estimates.view', $this),
+        );
     }
 
-    public function getCurrencySettingsAttribute()
+    public function getCurrencySettingsAttribute(): array
     {
         $setting = Setting::first();
 
@@ -75,12 +88,12 @@ class Estimate extends Model
         ];
     }
 
-    public function getNextSectionPosition()
+    public function getNextSectionPosition(): int
     {
         return $this->sections()->max('position') + 1;
     }
 
-    public function saveSectionsPositions(?array $positions)
+    public function saveSectionsPositions(?array $positions): void
     {
         if(empty($positions)) return;
 
@@ -94,21 +107,21 @@ class Estimate extends Model
         }
     }
 
-    public function duplicate()
+    public function duplicate(): bool
     {
         $estimateData = $this->treatDataForDuplication(
             $this->toArray()
         );
 
         $estimateData['name'] = $estimateData['name'] . ' Copy';
-        $duplicated = Estimate::create($estimateData);
+        $duplicated = self::create($estimateData);
 
         $this->copySectionsTo($duplicated);
 
         return $duplicated;
     }
 
-    protected function copySectionsTo(Estimate $duplicated)
+    protected function copySectionsTo(Estimate $duplicated): void
     {
         $this->sections->each(function($section) use ($duplicated) {
             $sectionData = $this->treatDataForDuplication(
@@ -117,11 +130,10 @@ class Estimate extends Model
 
             $newSection = $duplicated->sections()->create($sectionData);
             $this->copySectionItems($section, $newSection);
-
         });
     }
 
-    protected function copySectionItems(Section $from, Section $to)
+    protected function copySectionItems(Section $from, Section $to): void
     {
         $from->items->each(function($item) use ($to) {
             $itemData = $this->treatDataForDuplication(
@@ -132,7 +144,7 @@ class Estimate extends Model
         });
     }
 
-    protected function treatDataForDuplication(array $data)
+    protected function treatDataForDuplication(array $data): array
     {
         $removeKeys = ['id', 'created_at', 'updated_at', 'password'];
 
