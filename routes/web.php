@@ -17,36 +17,40 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/preview/blocked', function() {
+Route::get('/preview/blocked', function () {
     return view('preview-blocked');
 })->name('preview.blocked');
 
 Auth::routes(['register' => false]);
 
 Route::prefix('/')->middleware('auth')->group(function () {
-
     // Estimates
-    Route::resource('estimates', 'EstimateController');
-    Route::get('/estimates/{estimate}/duplicate', 'EstimateController@duplicate')->name('estimates.duplicate');
+    Route::resource('estimates', 'App\Http\Controllers\EstimateController');
+    Route::get('/estimates/{estimate}/duplicate', 'App\Http\Controllers\EstimateController@duplicate')
+        ->name('estimates.duplicate');
 
     // Estimate Sections
-    Route::apiResource('estimates/{estimate}/sections', 'SectionController');
+    Route::apiResource('estimates/{estimate}/sections', 'App\Http\Controllers\SectionController');
 
-    Route::middleware('block.on.preview')->group(function() {
-        
+    Route::middleware('block.on.preview')->group(function () {
         // Settings
-        Route::get('/settings', 'SettingController@edit')->name('settings.edit');
-        Route::put('/settings', 'SettingController@update')->name('settings.update');
-        Route::post('/settings/logo', 'SettingController@storeLogo')->name('settings.image.store');
-        Route::delete('/settings/logo', 'SettingController@removeLogo')->name('settings.image.remove');
+        Route::get('/settings', 'App\Http\Controllers\SettingController@edit')
+            ->name('settings.edit');
+        Route::put('/settings', 'App\Http\Controllers\SettingController@update')
+            ->name('settings.update');
+        Route::post('/settings/logo', 'App\Http\Controllers\SettingController@storeLogo')
+            ->name('settings.image.store');
+        Route::delete('/settings/logo', 'App\Http\Controllers\SettingController@removeLogo')
+            ->name('settings.image.remove');
 
         // Users
-        Route::resource('users', 'UserController')->middleware('block.on.preview');
-
+        Route::resource('users', 'App\Http\Controllers\UserController')
+            ->middleware('block.on.preview');
     });
-
 });
 
-Route::get('estimates/{estimate}/data', 'EstimateViewerController@getData');
-Route::get('estimates/{estimate}/view', 'EstimateViewerController@show')->name('estimates.view');
-Route::post('estimates/{estimate}/share', 'EstimateViewerController@share')->name('estimates.share');
+Route::get('estimates/{estimate}/data', 'App\Http\Controllers\EstimateViewerController@getData');
+Route::get('estimates/{estimate}/view', 'App\Http\Controllers\EstimateViewerController@show')
+    ->name('estimates.view');
+Route::post('estimates/{estimate}/share', 'App\Http\Controllers\EstimateViewerController@share')
+    ->name('estimates.share');
