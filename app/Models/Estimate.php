@@ -4,12 +4,13 @@ namespace App\Models;
 
 use App\Models\Setting;
 use App\Traits\HasUUID;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Estimate extends Model
 {
-    use SoftDeletes, HasUUID;
+    use SoftDeletes, HasUUID, HasFactory;
 
     protected $fillable = [
         'name',

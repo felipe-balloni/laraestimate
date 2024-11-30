@@ -15,7 +15,7 @@ abstract class TestCase extends BaseTestCase
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         DB::statement('PRAGMA foreign_keys=on;');
 
         $this->withoutExceptionHandling();
@@ -23,20 +23,10 @@ abstract class TestCase extends BaseTestCase
 
     protected function signIn($user = null)
     {
-        $user = $user ?: $this->create(User::class);
-        
+        $user = $user ?: User::factory()->create();
+
         $this->actingAs($user);
-        
+
         return $user;
-    }
-
-    protected function create($class, $attributes = [], $times = null)
-    {
-        return factory($class, $times)->create($attributes);
-    }
-
-    protected function make($class, $attributes = [], $times = null)
-    {
-        return factory($class, $times)->make($attributes);
     }
 }

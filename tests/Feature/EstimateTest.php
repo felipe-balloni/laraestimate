@@ -15,7 +15,7 @@ class EstimateTest extends TestCase
     {
         $this->expectException(AuthenticationException::class);
 
-        factory(Estimate::class, 5)->create();
+        Estimate::factory(5)->create();
 
         $this->get(route('estimates.index'));
     }
@@ -23,7 +23,7 @@ class EstimateTest extends TestCase
     public function test_a_user_can_list_estimates()
     {
         $this->signIn();
-        $estimates = factory(Estimate::class, 5)->create();
+        $estimates = Estimate::factory( 5)->create();
 
         $response = $this->get(route('estimates.index'));
 
@@ -35,7 +35,7 @@ class EstimateTest extends TestCase
     public function test_a_user_can_search_estimates()
     {
         $this->signIn();
-        $estimates = factory(Estimate::class, 20)->create();
+        $estimates = Estimate::factory(20)->create();
 
         $response = $this->get(route('estimates.index', ['search' => $estimates[0]->name]));
 
@@ -49,13 +49,13 @@ class EstimateTest extends TestCase
     {
         $this->signIn();
 
-        $estimate = factory(Estimate::class)->create();
+        $estimate = Estimate::factory()->create();
 
         $response = $this->put(route('estimates.update', $estimate), [
             'name' => $estimate->name . ' Edited',
             'sections_positions' => []
         ]);
-        
+
         $this->assertEquals($estimate->name . ' Edited', $estimate->fresh()->name);
     }
 }

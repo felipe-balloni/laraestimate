@@ -1,5 +1,7 @@
 <?php
 
+namespace Database\Seeders;
+
 use App\Models\Estimate;
 use App\Models\Item;
 use App\Models\Section;
@@ -8,7 +10,7 @@ use Illuminate\Database\Seeder;
 class PreviewEstimatesSeeder extends Seeder
 {
     /**
-     * Run the database seeds.
+     * Run the database seeders.
      *
      * @return void
      */
@@ -16,8 +18,7 @@ class PreviewEstimatesSeeder extends Seeder
     {
         factory(Estimate::class, 1)->create([
             'name' => 'Site Development Estimate'
-        ])->each(function($estimate) {
-            
+        ])->each(function ($estimate) {
             $textSectionData = factory(Section::class)->make([
                 'text' => "<b>Introduction</b><br>This is an example estimate so you can view some of the resources available. You can add as many text sections like this <b>Introduction</b> as you want.<br>All sections accepts <i>Rich-Text</i> content."
             ])->toArray();
@@ -31,7 +32,7 @@ class PreviewEstimatesSeeder extends Seeder
             unset($pricesSectionData['presentable_text']);
 
             $pricesSection = $estimate->sections()->create($pricesSectionData);
-            
+
             $itemData = factory(Item::class)->make([
                 'description' => 'Initial Setup, Research and Preparation',
                 'duration' => '5 days',
@@ -71,7 +72,7 @@ class PreviewEstimatesSeeder extends Seeder
                 'text' => "<b>Another Text Section</b><br>You can also put the total budget price wherever you want, as well as the selected total price, for example:
                 <br><br>
                 This is the total budget price: <b>*TOTAL_PRICE*</b>
-                <br><br>    
+                <br><br>
                 And this is the total price selected: <b>*TOTAL_SELECTED_PRICE*</b>
                 <br><br>
                 Try to selecet/unselect the items below to see the selected price changing
@@ -87,7 +88,7 @@ class PreviewEstimatesSeeder extends Seeder
             unset($pricesSectionData['presentable_text']);
 
             $pricesSection = $estimate->sections()->create($pricesSectionData);
-            
+
             $itemData = factory(Item::class)->make([
                 'description' => 'Add E-commerce',
                 'duration' => '13 days',
