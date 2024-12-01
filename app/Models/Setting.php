@@ -16,7 +16,7 @@ class Setting extends Model implements HasMedia
         'currency_thousands_separator',
     ];
 
-    public static function createDefault()
+    public static function createDefault(): array
     {
         return self::create([]);
     }

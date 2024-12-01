@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Estimate;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -11,7 +12,7 @@ class CreateSectionsTable extends Migration
      *
      * @return void
      */
-    public function up()
+    public function up(): void
     {
         Schema::create('sections', function (Blueprint $table) {
             $table->uuid('id')->primary();
@@ -21,11 +22,7 @@ class CreateSectionsTable extends Migration
 
             $table->smallInteger('position')->unsigned()->default(0);
 
-            $table->char('estimate_id', 36);
-            $table->foreign('estimate_id')
-                ->references('id')
-                ->on('estimates')
-                ->onDelete('CASCADE');
+            $table->foreignIdFor(Estimate::class)->constrained()->onDelete('cascade');
 
             $table->timestamps();
         });
@@ -36,7 +33,7 @@ class CreateSectionsTable extends Migration
      *
      * @return void
      */
-    public function down()
+    public function down(): void
     {
         Schema::dropIfExists('sections');
     }

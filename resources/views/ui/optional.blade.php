@@ -1,1 +1,0 @@
-<small class="text-primary">(@lang('app.labels.optional'))</small>

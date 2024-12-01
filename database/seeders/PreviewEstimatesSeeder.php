@@ -16,16 +16,16 @@ class PreviewEstimatesSeeder extends Seeder
      */
     public function run()
     {
-        factory(Estimate::class, 1)->create([
+        Estimate::factory()->create([
             'name' => 'Site Development Estimate'
         ])->each(function ($estimate) {
-            $textSectionData = factory(Section::class)->make([
+            $textSectionData = Section::factory()->make([
                 'text' => "<b>Introduction</b><br>This is an example estimate so you can view some of the resources available. You can add as many text sections like this <b>Introduction</b> as you want.<br>All sections accepts <i>Rich-Text</i> content."
             ])->toArray();
             unset($textSectionData['presentable_text']);
             $estimate->sections()->create($textSectionData);
 
-            $pricesSectionData = factory(Section::class)->make([
+            $pricesSectionData = Section::factory()->make([
                 'text' => '<b>Price Section</b><br>Here in the price section, it is possible to add mandatory items or not.',
                 'type' => 'prices'
             ])->toArray();
@@ -33,42 +33,42 @@ class PreviewEstimatesSeeder extends Seeder
 
             $pricesSection = $estimate->sections()->create($pricesSectionData);
 
-            $itemData = factory(Item::class)->make([
+            $itemData = Item::factory()->make([
                 'description' => 'Initial Setup, Research and Preparation',
                 'duration' => '5 days',
                 'obligatory' => true
             ])->toArray();
             $pricesSection->items()->create($itemData);
 
-            $itemData = factory(Item::class)->make([
+            $itemData = Item::factory()->make([
                 'description' => 'Home Page',
                 'duration' => '3 days',
                 'obligatory' => true
             ])->toArray();
             $pricesSection->items()->create($itemData);
 
-            $itemData = factory(Item::class)->make([
+            $itemData = Item::factory()->make([
                 'description' => 'Contact Page',
                 'duration' => '2 days',
                 'obligatory' => false
             ])->toArray();
             $pricesSection->items()->create($itemData);
 
-            $itemData = factory(Item::class)->make([
+            $itemData = Item::factory()->make([
                 'description' => 'About Page',
                 'duration' => '1 day',
                 'obligatory' => false
             ])->toArray();
             $pricesSection->items()->create($itemData);
 
-            $itemData = factory(Item::class)->make([
+            $itemData = Item::factory()->make([
                 'description' => 'Blog',
                 'duration' => '5 days',
                 'obligatory' => false
             ])->toArray();
             $pricesSection->items()->create($itemData);
 
-            $textSectionData = factory(Section::class)->make([
+            $textSectionData = Section::factory()->make([
                 'text' => "<b>Another Text Section</b><br>You can also put the total budget price wherever you want, as well as the selected total price, for example:
                 <br><br>
                 This is the total budget price: <b>*TOTAL_PRICE*</b>
@@ -81,7 +81,7 @@ class PreviewEstimatesSeeder extends Seeder
             unset($textSectionData['presentable_text']);
             $estimate->sections()->create($textSectionData);
 
-            $pricesSectionData = factory(Section::class)->make([
+            $pricesSectionData = Section::factory()->make([
                 'text' => '<b>Another Price Section</b><br>You can add as many price sections as you like. Let\'s see the selected price (*TOTAL_SELECTED_PRICE*) changing',
                 'type' => 'prices'
             ])->toArray();
@@ -89,14 +89,14 @@ class PreviewEstimatesSeeder extends Seeder
 
             $pricesSection = $estimate->sections()->create($pricesSectionData);
 
-            $itemData = factory(Item::class)->make([
+            $itemData = Item::factory()->make([
                 'description' => 'Add E-commerce',
                 'duration' => '13 days',
                 'obligatory' => false
             ])->toArray();
             $pricesSection->items()->create($itemData);
 
-            $itemData = factory(Item::class)->make([
+            $itemData = Item::factory()->make([
                 'description' => 'Create the Logotype',
                 'duration' => '20 days',
                 'obligatory' => false
