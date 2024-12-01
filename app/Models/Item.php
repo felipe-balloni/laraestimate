@@ -15,7 +15,7 @@ class Item extends Model
     protected $fillable = [
         'description',
         'duration',
-        'time_rate',
+        'duration_rate',
         'price',
         'obligatory',
     ];

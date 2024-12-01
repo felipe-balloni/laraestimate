@@ -22,7 +22,7 @@ class Estimate extends Model
         'name',
         'use_name_as_title',
         'expiration_date',
-        'time_rate',
+        'duration_rate',
         'currency_symbol',
         'currency_decimal_separator',
         'currency_thousands_separator',
@@ -31,7 +31,7 @@ class Estimate extends Model
     ];
 
     protected $appends = [
-        'share_url',
+//        'share_url',
         'logo_image',
         'currency_settings',
     ];
@@ -70,12 +70,12 @@ class Estimate extends Model
         return null;
     }
 
-    protected function shareUrl(): Attribute
-    {
-        return Attribute::make(
-            route('estimates.view', $this),
-        );
-    }
+//    protected function shareUrl(): Attribute
+//    {
+//        return Attribute::make(
+//            route('estimates.view', $this),
+//        );
+//    }
 
     public function getCurrencySettingsAttribute(): array
     {
