@@ -19,8 +19,8 @@ class ItemFactory extends Factory
         return [
             'description' => Str::title($this->faker->sentence(5)),
             'duration' => null,
-            'price' => rand(199, 599),
-            'obligatory' => false,
+            'price' => $this->faker->randomFloat(2, 20, 500),
+            'obligatory' => $this->faker->boolean(),
         ];
     }
 }

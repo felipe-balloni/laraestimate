@@ -3,21 +3,27 @@
 namespace App\Models;
 
 use App\Traits\HasUUID;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Section extends Model
 {
     use HasUuids, HasFactory;
 
     protected $fillable = [
+        'estimate_id',
         'text',
         'type',
+        'position',
+        'sort'
     ];
 
     protected $appends = [
-        'presentable_text'
+        'presentable_text',
     ];
 
     public static function boot()
@@ -34,13 +40,13 @@ class Section extends Model
         return $this->belongsTo(Estimate::class);
     }
 
-    public function items()
+    public function items(): HasMany
     {
         return $this->hasMany(Item::class)
             ->orderBy('position');
     }
 
-    public function getPresentableTextAttribute()
+    public function getPresentableTextAttribute(): string
     {
         $text = $this->text;
 
@@ -50,31 +56,8 @@ class Section extends Model
         return $text;
     }
 
-    public function saveItems(array $items)
-    {
-        $this->items()->delete();
-
-        collect($items)->each(function($item) {
-            $this->items()->create($item);
-        });
-    }
-
-    public function getNextItemPosition()
+    public function getNextItemPosition(): int
     {
         return $this->items()->max('position') + 1;
-    }
-
-    public function saveItemsPositions(?array $positions)
-    {
-        if(empty($positions)) return;
-
-        foreach ($positions as $itemId => $position) {
-            $item = Item::find($sectionId);
-
-            if($item) {
-                $item->position = $position;
-                $item->save();
-            }
-        }
     }
 }

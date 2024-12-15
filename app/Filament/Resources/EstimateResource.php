@@ -2,9 +2,13 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Clusters\Products\Resources\ProductResource;
 use App\Filament\Resources\EstimateResource\Pages;
 use App\Filament\Resources\EstimateResource\RelationManagers;
+use App\Models\Shop\Product;
 use Filament\Forms;
+use Filament\Forms\Components\Actions\Action;
+use Filament\Forms\Components\Repeater;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Support\Enums\FontWeight;
@@ -24,15 +28,94 @@ class EstimateResource extends Resource
         return $form
             ->schema([
                 Forms\Components\TextInput::make('name')
+                    ->label('Nome')
                     ->required(),
                 Forms\Components\Toggle::make('use_name_as_title')
+                    ->label('usar o Nome como título')
                     ->required(),
-                Forms\Components\TextInput::make('currency_symbol'),
+                Forms\Components\TextInput::make('currency_symbol')
+                    ->label('Moeda')
+                    ->required(),
                 Forms\Components\TextInput::make('duration_rate')
+                    ->label('Valor unitário')
                     ->required()
                     ->numeric()
                     ->default(0),
+                Forms\Components\Section::make('Seções')
+                    ->headerActions([
+                        Action::make('Adiciona seção somente texto')
+                            ->color('primary')
+                            ->action(fn(Forms\Set $set) => $set('items', [])),
+                        Action::make('Adiciona seção de precificação')
+                            ->color('info')
+                            ->action(fn(Forms\Set $set) => $set('items', [])),
+                    ])
+                    ->schema([
+                        static::getItemsRepeater(),
+                    ]),
             ]);
+    }
+
+    public static function getItemsRepeater(): Repeater
+    {
+        return Repeater::make('sections')
+            ->relationship()
+            ->schema([
+                Forms\Components\RichEditor::make('text')
+                    ->label('Texto')
+                    ->columnSpanFull(),
+                Forms\Components\Radio::make('type')
+                    ->label('Tipo')
+                    ->options([
+                        'text' => 'Texto',
+                        'prices' => 'Precificar',
+                    ])
+                    ->default('text')
+                    ->inline()
+                    ->live(),
+                Repeater::make('items')
+                    ->relationship()
+                    ->schema([
+                        Forms\Components\Toggle::make('obligatory')
+                            ->inline(false)
+                            ->default(true)
+                            ->label('Obrigatório'),
+                        Forms\Components\TextInput::make('description')
+                            ->label('descrição')
+                            ->columnSpan([
+                                'lg' => 3,
+                                'xl' => 4
+                            ])
+                            ->required(),
+                        Forms\Components\TextInput::make('duration')
+                            ->label('Duração')
+                            ->required()
+                            ->numeric()
+                            ->live()
+                            ->default(0),
+                        Forms\Components\TextInput::make('duration_rate')
+                            ->label('Valor')
+                            ->required()
+                            ->numeric()
+                            ->live()
+                            ->default(0),
+                        Forms\Components\TextInput::make('price')
+                            ->label('Total')
+                            ->required()
+                            ->default(0),
+                    ])
+                    ->columns([
+                        'lg' => 6,
+                        'xl' => 8
+                    ])
+                    ->orderColumn('position')
+                    ->reorderableWithButtons()
+                    ->hidden(fn($record): bool => $record->type !== 'prices')
+            ])
+            ->orderColumn('position')
+            ->reorderableWithButtons()
+            ->cloneable()
+            ->hiddenLabel();
     }
 
     public static function table(Table $table): Table
