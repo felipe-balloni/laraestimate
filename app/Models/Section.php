@@ -18,7 +18,7 @@ class Section extends Model
         'estimate_id',
         'text',
         'type',
-        'position',
+        'order',
         'sort'
     ];
 
@@ -31,7 +31,7 @@ class Section extends Model
         parent::boot();
 
         self::creating(function($section) {
-            $section->position = $section->estimate->getNextSectionPosition();
+            $section->order = $section->estimate->getNextSectionPosition();
         });
     }
 
@@ -43,7 +43,7 @@ class Section extends Model
     public function items(): HasMany
     {
         return $this->hasMany(Item::class)
-            ->orderBy('position');
+            ->orderBy('order');
     }
 
     public function getPresentableTextAttribute(): string
@@ -58,6 +58,6 @@ class Section extends Model
 
     public function getNextItemPosition(): int
     {
-        return $this->items()->max('position') + 1;
+        return $this->items()->max('order') + 1;
     }
 }

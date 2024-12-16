@@ -29,7 +29,7 @@ class Item extends Model
         parent::boot();
 
         self::creating(function($item) {
-            $item->position = $item->section->getNextItemPosition();
+            $item->order = $item->section->getNextItemPosition();
         });
     }
 

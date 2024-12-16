@@ -108,11 +108,11 @@ class EstimateResource extends Resource
                         'lg' => 6,
                         'xl' => 8
                     ])
-                    ->orderColumn('position')
+                    ->orderColumn('order')
                     ->reorderableWithButtons()
                     ->hidden(fn($record): bool => $record->type !== 'prices')
             ])
-            ->orderColumn('position')
+            ->orderColumn('order')
             ->reorderableWithButtons()
             ->cloneable()
             ->hiddenLabel();

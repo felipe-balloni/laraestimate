@@ -44,7 +44,7 @@ class Estimate extends Model
     {
         return $this->hasMany(Section::class)
             ->with('items')
-            ->orderBy('position')
+            ->orderBy('order')
             ->orderBy('created_at', 'desc');
     }
 
@@ -77,7 +77,7 @@ class Estimate extends Model
 //    }
     public function getNextSectionPosition(): int
     {
-        return $this->sections()->max('position') + 1;
+        return $this->sections()->max('order') + 1;
     }
 
 }
