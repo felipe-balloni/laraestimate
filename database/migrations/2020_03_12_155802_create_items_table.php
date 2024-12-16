@@ -23,7 +23,7 @@ class CreateItemsTable extends Migration
             $table->decimal('price')->nullable()->default(0);
             $table->boolean('obligatory')->default(false);
 
-            $table->smallInteger('position')->unsigned()->default(0);
+            $table->unsignedInteger('order')->default(0);
 
             $table->foreignIdFor(Section::class)->constrained()->onDelete('cascade');
 

@@ -22,6 +22,10 @@ class Section extends Model
         'sort'
     ];
 
+    protected $casts = [
+        'order' => 'integer',
+    ];
+
     protected $appends = [
         'presentable_text',
     ];
@@ -31,7 +35,7 @@ class Section extends Model
         parent::boot();
 
         self::creating(function($section) {
-            $section->order = $section->estimate->getNextSectionPosition();
+            $section->order = ($section->estimate?->sections()->max('order') ?? 0) + 1;
         });
     }
 
@@ -54,10 +58,5 @@ class Section extends Model
         $text = str_replace('*TOTAL_SELECTED_PRICE*', '<span class="total-selected-calc-price"></span>', $text);
 
         return $text;
-    }
-
-    public function getNextItemPosition(): int
-    {
-        return $this->items()->max('order') + 1;
     }
 }

@@ -68,16 +68,4 @@ class Estimate extends Model
 
         return null;
     }
-
-//    protected function shareUrl(): Attribute
-//    {
-//        return Attribute::make(
-//            route('estimates.view', $this),
-//        );
-//    }
-    public function getNextSectionPosition(): int
-    {
-        return $this->sections()->max('order') + 1;
-    }
-
 }

@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 
 class Item extends Model
 {
@@ -17,11 +18,13 @@ class Item extends Model
         'duration',
         'duration_rate',
         'price',
+        'order',
         'obligatory',
     ];
 
     protected $casts = [
-        'obligatory' => 'boolean'
+        'obligatory' => 'boolean',
+        'order' => 'integer'
     ];
 
     public static function boot(): void
@@ -29,7 +32,7 @@ class Item extends Model
         parent::boot();
 
         self::creating(function($item) {
-            $item->order = $item->section->getNextItemPosition();
+            $item->order = ($item->section?->items()->max('order') ?? 0) + 1;
         });
     }
 

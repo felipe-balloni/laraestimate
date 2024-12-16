@@ -20,7 +20,7 @@ class CreateSectionsTable extends Migration
             $table->text('text')->nullable();
             $table->enum('type', ['text', 'contact', 'prices']);
 
-            $table->smallInteger('position')->unsigned()->default(0);
+            $table->unsignedInteger('order')->default(0);
 
             $table->foreignIdFor(Estimate::class)->constrained()->onDelete('cascade');
 
