@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 
 class Section extends Model
 {
@@ -33,7 +34,7 @@ class Section extends Model
         'presentable_text',
     ];
 
-    public static function boot()
+    public static function boot(): void
     {
         parent::boot();
 
@@ -42,7 +43,7 @@ class Section extends Model
         });
     }
 
-    public function estimate()
+    public function estimate(): BelongsTo
     {
         return $this->belongsTo(Estimate::class);
     }
@@ -52,6 +53,19 @@ class Section extends Model
         return $this->hasMany(Item::class)
             ->orderBy('order');
     }
+
+    public function user(): HasOneThrough
+    {
+        return $this->hasOneThrough(
+            User::class,    // Target model
+            Estimate::class, // Intermediate model
+            'id',           // Foreign key on the estimates table
+            'id',           // Foreign key on the users table
+            'estimate_id',  // Local key on the sections table
+            'user_id'       // Local key on the estimates table
+        );
+    }
+
 
     public function getPresentableTextAttribute(): string
     {

@@ -40,4 +40,16 @@ class Item extends Model
     {
         return $this->belongsTo(Section::class);
     }
+
+    public function user(): HasOneThrough
+    {
+        return $this->hasOneThrough(
+            User::class,        // Target model
+            Estimate::class,    // Intermediate model
+            'id',               // Foreign key on estimates table
+            'id',               // Foreign key on users table
+            'section_id',       // Local key on items table
+            'user_id'           // Local key on estimates table
+        )->join('sections', 'sections.id', '=', 'items.section_id');
+    }
 }
