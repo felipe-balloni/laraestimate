@@ -5,16 +5,10 @@ namespace App\Filament\Resources;
 use App\Filament\Clusters\Products\Resources\ProductResource;
 use App\Filament\Resources\EstimateResource\Pages;
 use App\Filament\Resources\EstimateResource\RelationManagers;
-use App\Models\Estimate;
-use App\Models\MajorArea;
 use App\Models\Section;
-use App\Models\Shop\Product;
 use Filament\Forms;
 use Filament\Forms\Components\Actions\Action;
-use Filament\Forms\Components\Repeater;
 use Filament\Forms\Form;
-use Filament\Forms\Get;
-use Filament\Forms\Set;
 use Filament\Resources\Resource;
 use Filament\Support\Enums\FontWeight;
 use Filament\Tables;
@@ -25,6 +19,7 @@ use Filament\Tables\Table;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Str;
 
 class EstimateResource extends Resource
 {
@@ -38,13 +33,21 @@ class EstimateResource extends Resource
                 Forms\Components\Toggle::make('use_name_as_title')
                     ->label('Usar o Nome como título')
                     ->required(),
-                Forms\Components\TextInput::make('currency_symbol')
+                Forms\Components\Select::make('currency')
                     ->label('Moeda')
+                    ->options(function () {
+                        $keys = array_keys(config('money.currencies') ?? ['BRL']);
+                        return array_combine($keys, $keys);
+                    })
+                    ->default('BRL')
+                    ->extraInputAttributes(['onfocus' => 'this.select()'])
+                    ->searchable()
                     ->required(),
                 Forms\Components\TextInput::make('duration_rate')
                     ->label('Valor unitário')
                     ->required()
                     ->numeric()
+                    ->extraInputAttributes(['onfocus' => 'this.select()'])
                     ->default(0),
                 Forms\Components\Section::make('Seções')
                     ->headerActions([
@@ -78,8 +81,12 @@ class EstimateResource extends Resource
                         Forms\Components\Repeater::make('sections')
                             ->hiddenLabel()
                             ->relationship()
+                            ->addable(false)
                             ->reorderable()
+                            ->orderColumn('order')
                             ->reorderableWithDragAndDrop()
+                            ->collapsible()
+                            ->collapsed()
                             ->schema([
                                 Forms\Components\TextInput::make('estimate_id')
                                     ->required()
@@ -94,7 +101,10 @@ class EstimateResource extends Resource
                                     ->label('Texto da Seção'),
 
                                 Forms\Components\Repeater::make('items')
-                                    ->relationship('items')
+                                    ->relationship()
+                                    ->reorderable()
+                                    ->orderColumn('order')
+                                    ->reorderableWithDragAndDrop()
                                     ->schema(ItemResource::getForm())
                                     ->columns(2)
                                     ->collapsible()
@@ -107,6 +117,7 @@ class EstimateResource extends Resource
                                         'lg' => 6,
                                         'md' => 3,
                                     ])
+                                    ->defaultItems(0)
                                     ->minItems(1)
                             ])
                             ->afterStateHydrated(function (array &$state, $get) {
@@ -115,10 +126,16 @@ class EstimateResource extends Resource
                                 }
                             })
                             ->mutateRelationshipDataBeforeCreateUsing(fn (array $data): array => $data)
-                            ->itemLabel(fn (array $state): ?string => $state['type'] === Section::TYPE_PRICES
-                                ? 'Seção de Precificação'
-                                : 'Seção de Texto'
-                            )
+                            ->itemLabel(function (array $state): ?string {
+                                $label = $state['type'] === Section::TYPE_PRICES
+                                    ? 'Seção de Precificação'
+                                    : 'Seção de Texto';
+
+                                $label .= ': ' . Str::limit($state['text'], 30);
+                                return $label;
+                            })
+                            ->defaultItems(0)
+                            ->minItems(0)
                     ])
             ]);
     }
@@ -137,14 +154,14 @@ class EstimateResource extends Resource
                         ->color('gray')
                         ->searchable(),
                     Split::make([
-                        TextColumn::make('currency_symbol')
-                            ->label(__('app.estimate.currency_symbol'))
+                        TextColumn::make('currency')
+                            ->label(__('app.estimate.currency'))
                             ->grow(false)
                             ->color('gray'),
                         TextColumn::make('duration_rate')
                             ->label(__('app.estimate.duration_rate'))
                             ->weight(FontWeight::Bold)
-                            ->money(fn($record): string => $record->currency_symbol)
+                            // ->money(fn($record): string => $record->currency)
                             ->color('gray'),
                     ]),
                 ])

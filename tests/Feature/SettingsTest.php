@@ -38,12 +38,12 @@ class SettingsTest extends TestCase
         $this->get(route('settings.edit'));
 
         $response = $this->put(route('settings.update'), [
-            'currency_symbol' => 'R$'
+            'currency' => 'R$'
         ]);
 
         $setting = Setting::firstOrFail();
 
-        $this->assertEquals('R$', $setting->currency_symbol);
+        $this->assertEquals('R$', $setting->currency);
     }
 
 }

@@ -11,9 +11,7 @@ class Setting extends Model implements HasMedia
     use InteractsWithMedia;
 
     protected $fillable = [
-        'currency_symbol',
-        'currency_decimal_separator',
-        'currency_thousands_separator',
+        'currency',
     ];
 
     public static function createDefault(): array

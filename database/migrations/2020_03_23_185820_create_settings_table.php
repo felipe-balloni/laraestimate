@@ -19,9 +19,8 @@ class CreateSettingsTable extends Migration
 
             $table->foreignIdFor(User::class)->constrained()->onDelete('cascade');
 
-            $table->string('currency_symbol')->nullable()->default('$');
-            $table->string('currency_decimal_separator')->nullable()->default('.');
-            $table->string('currency_thousands_separator')->nullable()->default('');
+            $table->string('currency')->default('BRL');
+
             $table->timestamps();
         });
     }

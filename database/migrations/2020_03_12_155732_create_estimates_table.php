@@ -24,7 +24,7 @@ class CreateEstimatesTable extends Migration
             $table->date('expiration_date')->nullable();
 
             $table->decimal('duration_rate')->default(0);
-            $table->string('currency_symbol')->nullable()->default('BRL');
+            $table->string('currency')->nullable()->default('BRL');
 
             $table->boolean('allows_to_select_items')->default(true);
             $table->string('password')->nullable();

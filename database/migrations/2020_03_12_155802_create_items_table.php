@@ -20,7 +20,7 @@ class CreateItemsTable extends Migration
             $table->string('description');
             $table->decimal('duration_rate')->default(0);
             $table->string('duration')->nullable();
-            $table->decimal('price')->nullable()->default(0);
+            $table->integer('price')->nullable()->default(0);
             $table->boolean('obligatory')->default(false);
 
             $table->unsignedInteger('order')->default(0);

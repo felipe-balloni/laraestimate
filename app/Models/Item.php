@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Casts\MoneyCast;
 use App\Traits\HasUUID;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -24,7 +25,8 @@ class Item extends Model
 
     protected $casts = [
         'obligatory' => 'boolean',
-        'order' => 'integer'
+        'order' => 'integer',
+        'price' => MoneyCast::class,
     ];
 
     public static function boot(): void

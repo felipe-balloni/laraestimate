@@ -23,9 +23,7 @@ class Estimate extends Model
         'use_name_as_title',
         'expiration_date',
         'duration_rate',
-        'currency_symbol',
-        'currency_decimal_separator',
-        'currency_thousands_separator',
+        'currency',
         'allows_to_select_items',
         'password',
     ];

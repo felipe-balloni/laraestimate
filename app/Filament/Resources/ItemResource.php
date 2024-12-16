@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use Akaunting\Money\Money;
 use App\Filament\Resources\ItemResource\Pages;
 use App\Models\Item;
 use Filament\Forms;
@@ -23,42 +24,50 @@ class ItemResource extends Resource
                 ->default(true)
                 ->label('Obrigatório'),
             Forms\Components\TextInput::make('description')
-                ->label('descrição')
+                ->label('Descrição')
                 ->columnSpan([
-                    'xl' => 4,
+                    'xl' => 3,
                     'lg' => 5,
                     'md' => 3,
                 ])
+                ->placeholder('Feature X')
                 ->required(),
             Forms\Components\TextInput::make('duration')
                 ->label('Duração')
+                ->extraInputAttributes(['onfocus' => 'this.select()'])
                 ->columnSpan([
                     'xl' => 1,
                     'lg' => 2,
                     'md' => 3,
                 ])
-                ->required()
-                ->numeric()
-                ->live()
-                ->default(0),
+                ->placeholder('15 dias')
+                ->required(),
             Forms\Components\TextInput::make('duration_rate')
                 ->label('Valor')
+                ->extraInputAttributes(['onfocus' => 'this.select()'])
                 ->columnSpan([
                     'xl' => 1,
                     'lg' => 2,
                     'md' => 3,
                 ])
-                ->required()
-                ->numeric()
-                ->live()
-                ->default(0),
+                ->placeholder('R$ 60/h')
+                ->required(),
             Forms\Components\TextInput::make('price')
                 ->label('Total')
+                ->extraInputAttributes(['onfocus' => 'this.select()'])
                 ->columnSpan([
-                    'xl' => 1,
+                    'xl' => 2,
                     'lg' => 2,
                     'md' => 3,
                 ])
+                ->numeric()
+                ->prefix(currency('BRL')->getSymbol())
+                ->currencyMask(
+                    currency('BRL')->getThousandsSeparator(),
+                    currency('BRL')->getDecimalMark(),
+                    currency('BRL')->getPrecision()
+                )
+                ->maxValue(42949672.95)
                 ->required()
                 ->default(0),
         ];
@@ -74,9 +83,14 @@ class ItemResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('description')->sortable()->searchable(),
-                Tables\Columns\TextColumn::make('price')->sortable(),
-                Tables\Columns\TextColumn::make('obligatory')->badge(),
+                Tables\Columns\TextColumn::make('description')
+                    ->sortable()
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('price')
+                    ->money('BRL')
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('obligatory')
+                    ->badge(),
             ])
             ->filters([]);
     }
