@@ -5,11 +5,16 @@ namespace App\Filament\Resources;
 use App\Filament\Clusters\Products\Resources\ProductResource;
 use App\Filament\Resources\EstimateResource\Pages;
 use App\Filament\Resources\EstimateResource\RelationManagers;
+use App\Models\Estimate;
+use App\Models\MajorArea;
+use App\Models\Section;
 use App\Models\Shop\Product;
 use Filament\Forms;
 use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Form;
+use Filament\Forms\Get;
+use Filament\Forms\Set;
 use Filament\Resources\Resource;
 use Filament\Support\Enums\FontWeight;
 use Filament\Tables;
@@ -31,7 +36,7 @@ class EstimateResource extends Resource
                     ->label('Nome')
                     ->required(),
                 Forms\Components\Toggle::make('use_name_as_title')
-                    ->label('usar o Nome como título')
+                    ->label('Usar o Nome como título')
                     ->required(),
                 Forms\Components\TextInput::make('currency_symbol')
                     ->label('Moeda')
@@ -43,79 +48,79 @@ class EstimateResource extends Resource
                     ->default(0),
                 Forms\Components\Section::make('Seções')
                     ->headerActions([
-                        Action::make('Adiciona seção somente texto')
+                        Action::make('addTextSection')
+                            ->label('Adicionar Seção de Texto')
                             ->color('primary')
-                            ->action(fn(Forms\Set $set) => $set('items', [])),
-                        Action::make('Adiciona seção de precificação')
-                            ->color('info')
-                            ->action(fn(Forms\Set $set) => $set('items', [])),
-                    ])
-                    ->schema([
-                        static::getItemsRepeater(),
-                    ]),
-            ]);
-    }
+                            ->action(function (callable $set, $get) {
+                                $sections = $get('sections') ?? [];
+                                $sections[] = [
+                                    'type' => Section::TYPE_TEXT,
+                                    'text' => '',
+                                ];
+                                $set('sections', $sections);
+                            })
+                            ->hidden(fn ($livewire) => $livewire instanceof Pages\ViewEstimate),
 
-    public static function getItemsRepeater(): Repeater
-    {
-        return Repeater::make('sections')
-            ->relationship()
-            ->schema([
-                Forms\Components\RichEditor::make('text')
-                    ->label('Texto')
-                    ->columnSpanFull(),
-                Forms\Components\Radio::make('type')
-                    ->label('Tipo')
-                    ->options([
-                        'text' => 'Texto',
-                        'prices' => 'Precificar',
+                        Action::make('addPrecificationSection')
+                            ->label('Adicionar Seção de Precificação')
+                            ->color('secondary')
+                            ->action(function (callable $set, $get) {
+                                $sections = $get('sections') ?? [];
+                                $sections[] = [
+                                    'type' => Section::TYPE_PRICES,
+                                    'text' => '',
+                                ];
+                                $set('sections', $sections);
+                            })
+                            ->hidden(fn ($livewire) => $livewire instanceof Pages\ViewEstimate),
                     ])
-                    ->default('text')
-                    ->inline()
-                    ->live(),
-                Repeater::make('items')
-                    ->relationship()
                     ->schema([
-                        Forms\Components\Toggle::make('obligatory')
-                            ->inline(false)
-                            ->default(true)
-                            ->label('Obrigatório'),
-                        Forms\Components\TextInput::make('description')
-                            ->label('descrição')
-                            ->columnSpan([
-                                'lg' => 3,
-                                'xl' => 4
+                        Forms\Components\Repeater::make('sections')
+                            ->hiddenLabel()
+                            ->relationship()
+                            ->reorderable()
+                            ->reorderableWithDragAndDrop()
+                            ->schema([
+                                Forms\Components\TextInput::make('estimate_id')
+                                    ->required()
+                                    ->hidden(),
+
+                                Forms\Components\Hidden::make('type')
+                                    ->required()
+                                    ->dehydrated(true)
+                                    ->live(),
+
+                                Forms\Components\Textarea::make('text')
+                                    ->label('Texto da Seção'),
+
+                                Forms\Components\Repeater::make('items')
+                                    ->relationship('items')
+                                    ->schema(ItemResource::getForm())
+                                    ->columns(2)
+                                    ->collapsible()
+                                    ->addActionLabel('Add Item')
+                                    ->visible(fn ($get) => $get('type') === Section::TYPE_PRICES)
+                                    ->itemLabel(fn (array $state): ?string => $state['description'])
+                                    ->live()
+                                    ->columns([
+                                        'xl' => 8,
+                                        'lg' => 6,
+                                        'md' => 3,
+                                    ])
+                                    ->minItems(1)
                             ])
-                            ->required(),
-                        Forms\Components\TextInput::make('duration')
-                            ->label('Duração')
-                            ->required()
-                            ->numeric()
-                            ->live()
-                            ->default(0),
-                        Forms\Components\TextInput::make('duration_rate')
-                            ->label('Valor')
-                            ->required()
-                            ->numeric()
-                            ->live()
-                            ->default(0),
-                        Forms\Components\TextInput::make('price')
-                            ->label('Total')
-                            ->required()
-                            ->default(0),
+                            ->afterStateHydrated(function (array &$state, $get) {
+                                foreach ($state as &$section) {
+                                    $section['estimate_id'] = $get('id');
+                                }
+                            })
+                            ->mutateRelationshipDataBeforeCreateUsing(fn (array $data): array => $data)
+                            ->itemLabel(fn (array $state): ?string => $state['type'] === Section::TYPE_PRICES
+                                ? 'Seção de Precificação'
+                                : 'Seção de Texto'
+                            )
                     ])
-                    ->columns([
-                        'lg' => 6,
-                        'xl' => 8
-                    ])
-                    ->orderColumn('order')
-                    ->reorderableWithButtons()
-                    ->hidden(fn($record): bool => $record->type !== 'prices')
-            ])
-            ->orderColumn('order')
-            ->reorderableWithButtons()
-            ->cloneable()
-            ->hiddenLabel();
+            ]);
     }
 
     public static function table(Table $table): Table
@@ -160,13 +165,6 @@ class EstimateResource extends Resource
             ])
             ->bulkActions([
             ]);
-    }
-
-    public static function getRelations(): array
-    {
-        return [
-            //
-        ];
     }
 
     public static function getPages(): array
