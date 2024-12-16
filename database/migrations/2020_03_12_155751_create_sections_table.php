@@ -18,7 +18,7 @@ class CreateSectionsTable extends Migration
             $table->uuid('id')->primary();
 
             $table->text('text')->nullable();
-            $table->enum('type', ['text', 'contact', 'prices']);
+            $table->string('type'); // text | prices
 
             $table->unsignedInteger('order')->default(0);
 

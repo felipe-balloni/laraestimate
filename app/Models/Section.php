@@ -14,6 +14,9 @@ class Section extends Model
 {
     use HasUuids, HasFactory;
 
+    const TYPE_TEXT = "text";
+    const TYPE_PRICES = "prices";
+
     protected $fillable = [
         'estimate_id',
         'text',
