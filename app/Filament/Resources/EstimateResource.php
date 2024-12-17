@@ -6,9 +6,11 @@ use App\Filament\Clusters\Products\Resources\ProductResource;
 use App\Filament\Resources\EstimateResource\Pages;
 use App\Filament\Resources\EstimateResource\RelationManagers;
 use App\Models\Section;
+use App\Models\Setting;
 use Filament\Forms;
 use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Form;
+use Filament\Forms\Get;
 use Filament\Resources\Resource;
 use Filament\Support\Enums\FontWeight;
 use Filament\Tables;
@@ -19,36 +21,55 @@ use Filament\Tables\Table;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
 class EstimateResource extends Resource
 {
     public static function form(Form $form): Form
     {
+        $userSettings = Setting::where('user_id', Auth::id())->first() ?? new Setting();
+
         return $form
             ->schema([
-                Forms\Components\TextInput::make('name')
-                    ->label('Nome')
-                    ->required(),
-                Forms\Components\Toggle::make('use_name_as_title')
-                    ->label('Usar o Nome como título')
-                    ->required(),
-                Forms\Components\Select::make('currency')
-                    ->label('Moeda')
-                    ->options(function () {
-                        $keys = array_keys(config('money.currencies') ?? ['BRL']);
-                        return array_combine($keys, $keys);
-                    })
-                    ->default('BRL')
-                    ->extraInputAttributes(['onfocus' => 'this.select()'])
-                    ->searchable()
-                    ->required(),
-                Forms\Components\TextInput::make('duration_rate')
-                    ->label('Valor unitário')
-                    ->required()
-                    ->numeric()
-                    ->extraInputAttributes(['onfocus' => 'this.select()'])
-                    ->default(0),
+                Forms\Components\Grid::make(3)->schema([
+                    Forms\Components\Section::make('Title')
+                        ->columnSpan(2)
+                        ->collapsible()
+                        ->collapsed(fn (Get $get) => !empty($get('name')))
+                        ->heading(fn (Get $get) => $get('name') ?? 'Título')
+                        ->schema([
+                            Forms\Components\TextInput::make('name')
+                                ->label('Nome')
+                                ->required(),
+                            Forms\Components\Toggle::make('use_name_as_title')
+                                ->label('Usar o Nome como Título')
+                                ->required(),
+                        ]),
+
+                    Forms\Components\Section::make('Project Currency')
+                        ->columnSpan(1)
+                        ->collapsible()
+                        ->collapsed(fn (Get $get) => !empty($get('name')))
+                        ->schema([
+                            Forms\Components\Select::make('currency')
+                                ->label('Moeda')
+                                ->options(function () {
+                                    $keys = array_keys(config('money.currencies') ?? ['BRL']);
+                                    return array_combine($keys, $keys);
+                                })
+                                ->default($userSettings->currency ?? 'BRL')
+                                ->extraInputAttributes(['onfocus' => 'this.select()'])
+                                ->searchable(),
+                            Forms\Components\TextInput::make('hourly_rate')
+                                ->label('Hourly Rate')
+                                ->default($userSettings->hourly_rate ?? 0)
+                                ->extraInputAttributes(['onfocus' => 'this.select()'])
+                                ->numeric()
+                                ->suffix('/hour'),
+                        ]),
+                ]),
+
                 Forms\Components\Section::make('Seções')
                     ->headerActions([
                         Action::make('addTextSection')
@@ -97,7 +118,7 @@ class EstimateResource extends Resource
                                     ->dehydrated(true)
                                     ->live(),
 
-                                Forms\Components\Textarea::make('text')
+                                Forms\Components\RichEditor::make('text')
                                     ->label('Texto da Seção'),
 
                                 Forms\Components\Repeater::make('items')
