@@ -23,8 +23,8 @@ class CreateEstimatesTable extends Migration
             $table->boolean('use_name_as_title')->default(true);
             $table->date('expiration_date')->nullable();
 
-            $table->decimal('duration_rate')->default(0);
-            $table->string('currency')->nullable()->default('BRL');
+            $table->integer('hourly_rate')->nullable();
+            $table->string('currency')->nullable();
 
             $table->boolean('allows_to_select_items')->default(true);
             $table->string('password')->nullable();

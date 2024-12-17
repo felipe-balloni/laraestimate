@@ -22,7 +22,7 @@ class Estimate extends Model
         'name',
         'use_name_as_title',
         'expiration_date',
-        'duration_rate',
+        'hourly_rate',
         'currency',
         'allows_to_select_items',
         'password',
@@ -31,6 +31,12 @@ class Estimate extends Model
     protected $appends = [
 //        'share_url',
         'logo_image',
+    ];
+
+    protected $casts = [
+        'hourly_rate' => MoneyCast::class,
+        'expiration_date' => 'date',
+        'allows_to_select_items' => 'boolean',
     ];
 
     public function user(): BelongsTo

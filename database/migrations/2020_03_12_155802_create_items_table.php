@@ -18,7 +18,7 @@ class CreateItemsTable extends Migration
             $table->uuid('id')->primary();
 
             $table->string('description');
-            $table->decimal('duration_rate')->default(0);
+            $table->decimal('hourly_rate')->default(0);
             $table->string('duration')->nullable();
             $table->integer('price')->nullable()->default(0);
             $table->boolean('obligatory')->default(false);

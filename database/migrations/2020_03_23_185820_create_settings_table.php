@@ -16,11 +16,9 @@ class CreateSettingsTable extends Migration
     {
         Schema::create('settings', function (Blueprint $table) {
             $table->id();
-
-            $table->foreignIdFor(User::class)->constrained()->onDelete('cascade');
-
+            $table->foreignIdFor(User::class)->constrained()->cascadeOnDelete();
+            $table->integer('hourly_rate')->nullable();
             $table->string('currency')->default('BRL');
-
             $table->timestamps();
         });
     }
